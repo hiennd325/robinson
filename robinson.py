@@ -40,7 +40,7 @@ def res(a, b, bien, giaTri):
             
     # Nếu tìm thấy cặp đối ngẫu ngay lập tức
     if check:
-        return sorted(ans), None
+        return ans, None
 
     # Bước 2: Tìm khả năng hợp nhất (unification)
     tap_ketqua = []
@@ -100,10 +100,21 @@ def res(a, b, bien, giaTri):
                 b_new = doibien(b, doi)
                 tmp1, tmp2 = res(a_new, b_new, bien, giaTri)
                 
-                # Chỉ thêm nếu kết quả hợp lệ (tránh lặp vô tận hoặc sai logic)
-                if tmp1 not in tap_ketqua:
-                    tap_ketqua.append(sorted(tmp1))
-                    tap_doi.append(doi)
+                # Nếu là kết quả đơn (tmp2 is None), tmp1 là một clause list
+                # Nếu là kết quả multiple (tmp2 is not None), tmp1 là một list of clause lists
+                if tmp2 is None:
+                    # Kết quả đơn - thêm tmp1 như một clause list
+                    if tmp1 not in tap_ketqua:
+                        tap_ketqua.append(tmp1)
+                        tap_doi.append(doi)
+                else:
+                    # Kết quả multiple - extend và thêm tất cả substitutions tương ứng
+                    for idx, result in enumerate(tmp1):
+                        if result not in tap_ketqua:
+                            tap_ketqua.append(result)
+                            # Combine the current doi with the recursive doi
+                            combined_doi = doi + tmp2[idx]
+                            tap_doi.append(combined_doi)
 
     return tap_ketqua, tap_doi
 
